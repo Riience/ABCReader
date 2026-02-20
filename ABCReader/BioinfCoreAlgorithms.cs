@@ -44,11 +44,6 @@ namespace ABCReader {
         // and aa2idx['M'-'A'] => 12
         
         public static string[] NeedlemanWunsch(string refSeq, string alignSeq) {
-            //string refSeq = "GAATTCAGTTA";
-            //string alignSeq = "GGATCGA";
-
-            //refSeq = "ATGGCCATGGAGATAGAGGGGCCTGCGCAGCATGGAGCAACAGGATGGG";
-            //alignSeq = "ATGCAAACACTAAGACAATTGGCAAGAGATGGACACACGGTGATCTGTTCTA";
             //STAGE1
             string[] result = new string[5];
             int refSeqCnt = refSeq.Length + 1;
@@ -149,58 +144,41 @@ namespace ABCReader {
         }
 
         private static int ScoreFunction(char a, char b, int matchScore, int mismatchScore) {
-            //Wenn die Buchstaben gleich sind ist der Match-Score der Rückgabewert.
-            //Wenn nicht gib den Mismatch-Score zurück.
             return a == b ? matchScore : mismatchScore;
         }
 
-        //Die Align-Methode bekommt die beiden Sequenzen A und B, den Gap-Penalty, Match- und Mismatch-Score als Parameter.
-        //match +5 , mismatch as -3 and gap penalty as -4
         public static string[] SmithWatermanAlign(string sequenceA, string sequenceB, int gapPenalty, int matchScore, int mismatchScore) {
-            //Hier werden beide Matrizen initialisiert. Die Scoring- und Traceback-Matrix.
             #region Initialize
             int[,] matrix = new int[sequenceA.Length + 1, sequenceB.Length + 1];
             char[,] tracebackMatrix = new char[sequenceA.Length + 1, sequenceB.Length + 1];
             matrix[0, 0] = 0;
 
-            //Befülle die erste Reihe der Matrizen.
             for (int i = 1; i < sequenceA.Length + 1; i++) {
                 matrix[i, 0] = 0;
                 tracebackMatrix[i, 0] = '0';
             }
 
-            //Befülle die erste Spalte der Matrizen.
             for (int i = 1; i < sequenceB.Length + 1; i++) {
                 matrix[0, i] = 0;
                 tracebackMatrix[0, i] = '0';
             }
             #endregion
-
-            //Hier werden die Werte für die Scoring-Matrix berechnet. Zeitgleich befüllen
-            //wir die Traceback-Matrix.
             #region Scoring
 
-            //Diese Variable benutzen wir um uns die Zelle mit dem Höchsten Wert zu merken.
-            //Diese wird uns beim Traceback als Startpunkt dienen.
             int[] score = new int[2];
 
             for (int i = 1; i < sequenceA.Length + 1; i++) {
-                for (int j = 1; j < sequenceB.Length + 1; j++) {
-                    //Lese und berechne die Werte der Vorgängerzellen.                     
+                for (int j = 1; j < sequenceB.Length + 1; j++) {                    
                     int diagonal = matrix[i - 1, j - 1] + ScoreFunction(sequenceA[i - 1], sequenceB[j - 1], matchScore, mismatchScore);                    
                     int links = matrix[i - 1, j] + gapPenalty;                    
-                    int oben = matrix[i, j - 1] + gapPenalty;                     
-                    //Der höchste Wert wird eingetragen.                    
-                    matrix[i, j] = Math.Max(Math.Max(oben, Math.Max(links, diagonal)),0);                     
-                    //Hier wird geprüft ob die aktuelle Zelle als Score für die matrix taugt.                     
+                    int oben = matrix[i, j - 1] + gapPenalty;                                    
+                    matrix[i, j] = Math.Max(Math.Max(oben, Math.Max(links, diagonal)),0);                                        
                     if (matrix[i,j] > matrix[score[0],score[1]])
                     {
                         score[0] = i;
                         score[1] = j;
                     }
 
-                    //Finde raus welche der Zellen den Wert geliefert hat und trage
-                    //dies in die Traceback-Matrix ein.
                     if (matrix[i, j] == diagonal && i > 0 && j > 0) {
                         tracebackMatrix[i, j] = 'D';
                     } else if (matrix[i, j] == links) {
@@ -214,24 +192,18 @@ namespace ABCReader {
             }
             #endregion
 
-            //Hier wird einfach die Traceback-Methode aufgerufen und liefert uns das Alignment.
             #region Traceback
             return TraceBack(tracebackMatrix, score, sequenceA, sequenceB);
             #endregion
-
         }
 
-        //Eine TraceBack-Matrix und die beiden Sequenzen sind die Paramter für das Traceback.
-        //Außerdem wird hier die Position der Score-zelle an die Methode übergeben.
         private static string[] TraceBack(char[,] tracebackMatrix, int[] score, string sequenzA, string sequenzB) {
-            //Lege die Startposition anhand des Scores fest
             int i = score[0];
             int j = score[1];
 
             StringBuilder alignedSeqA = new StringBuilder();
             StringBuilder alignedSeqB = new StringBuilder();
 
-            //Das Traceback wird asugeführt solange wir uns nicht in der Zelle (0,0) befinden.
             while (tracebackMatrix[i, j] != '0') {
                 switch (tracebackMatrix[i, j]) {
                     case 'D':
@@ -256,38 +228,8 @@ namespace ABCReader {
 
             string[] alignments = new string[2];
 
-            //Da wir die Zeichen jeweils rechts an die Alignments angefügt haben,
-            //rufen wir hier die Reverse-Methode um die Strings umzudrehen.
             alignments[0] = new string(alignedSeqA.ToString().Reverse().ToArray());
             alignments[1] = new string(alignedSeqB.ToString().Reverse().ToArray());
-
-            /*
-            int size1 = sequenzA.Length;
-            int size2 = sequenzB.Length;
-            if(size1 > size2) {
-                string tmp = alignments[0].Replace("-", "");
-                int x = sequenzA.IndexOf(tmp);
-                alignments[0] = sequenzA.Substring(0, x) + alignments[0];
-
-                for(int ii=0; ii<x; ii++) {
-                    alignments[1] = "-" + alignments[1];
-                }
-            } else {
-                string tmp = alignments[1].Replace("-", "");
-                int x = sequenzB.IndexOf(tmp);
-                alignments[1] = sequenzB.Substring(0, x) + alignments[1];
-
-                for (int ii = 0; ii < x; ii++) {
-                    alignments[0] = "-" + alignments[0];
-                }
-            }
-            */
-
-            //  tmp = alignments[1].Replace("-", "");
-            // x = sequenzB.IndexOf(tmp);
-            //alignments[1] = sequenzB.Substring(0, x) + alignments[1];
-
-            //Der Rückgabewert ist ein array welches beide alignments enthält.
             return alignments;
         }
 

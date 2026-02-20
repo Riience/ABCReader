@@ -29,7 +29,6 @@ namespace ABCReader {
                 }
             }
             return filePath;
-            //MessageBox.Show(fileContent, "File Content at path: " + filePath, MessageBoxButtons.OK);
         }
 
         public static string saveDialog(string currentDir, string mask) {
@@ -50,19 +49,13 @@ namespace ABCReader {
                 }
             }
             return filePath;
-            //MessageBox.Show(fileContent, "File Content at path: " + filePath, MessageBoxButtons.OK);
         }
 
         public static string OpenFolderDialog() {
             using (var fbd = new FolderBrowserDialog()) {
-                
                 DialogResult result = fbd.ShowDialog();
-
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath)) {
-                    //string[] files = Directory.GetFiles(fbd.SelectedPath);
-
                     return fbd.SelectedPath;
-                    //System.Windows.Forms.MessageBox.Show("Files found: " + files.Length.ToString(), "Message");
                 }
             }
             return null;

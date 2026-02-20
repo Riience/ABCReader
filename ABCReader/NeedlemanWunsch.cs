@@ -14,27 +14,22 @@ namespace ABCReader {
             Console.ReadKey();
         }
 
-        const int Size = 24; // BLOSUM62 matrix
+        const int Size = 24;
         readonly private List<string> linesMatrix;
         readonly List<LifeForm> lifeForms = new List<LifeForm>();
         readonly private int[,] matrix = new int[Size, Size];
         readonly Dictionary<string, int> lookup = new Dictionary<string, int>();
-        const int DefaultMismatchPenalty = -4; // if not defined, use this
+        const int DefaultMismatchPenalty = -4;
         static readonly string NL = Environment.NewLine;
-
-        // trace back
         const string DONE = @"¤";
         const string DIAG = @"\";
         const string UP = @"|";
         const string LEFT = @"-";
-
-        // print alignment
         const string GAP = @"-";
 
         public NeedlemanWunsch() {
             linesMatrix = ReadFileToList("BLOSUM62.txt");
         }
-
 
         // BLOSUM62.txt
         void ParseMatrixFile() {
@@ -65,13 +60,11 @@ namespace ABCReader {
             }
         }
 
-
         static string ReverseString(string s) {
             char[] arr = s.ToCharArray();
             Array.Reverse(arr);
             return new string(arr);
         }
-
         public void Run() {
             // put your data here
             lifeForms.Add(new LifeForm() { Name = "Sphinx", DNA = "KQRK" });
@@ -94,31 +87,13 @@ namespace ABCReader {
             }
         }
 
-
-        /*  
-             p = gap penalty      
-             a = diff char penalty
-          
-             Sequence-Alignment(m, n, xs, ys, p, a) {
-             for i = 0 to m
-                 M[i, 0] = i*p
-             for j = 0 to n
-                 M[0, j] = j*p
-             for i = 1 to m
-                 for j = 1 to n
-                     M[i, j] = max(  a(xi, yj) + M[i-1, j-1],
-                         p + M[i-1, j],
-                         p + M[i, j-1])
-             return M[m, n]            
-         */
         Sequence SequenceAlign(string xs, string ys) {
-            const int p = -4; //gap penalty, knowledge by looking at matrix file
+            const int p = -4;
             int m = xs.Length;
             int n = ys.Length;
 
-            // init the matrix
-            var M = new int[m + 1, n + 1]; // dynamic programming buttom up memory table
-            var T = new string[m + 1, n + 1]; // trace back
+            var M = new int[m + 1, n + 1];
+            var T = new string[m + 1, n + 1];
 
             for (int i = 0; i < m + 1; i++)
                 M[i, 0] = i * p;
@@ -151,7 +126,6 @@ namespace ABCReader {
             }
 
             var traceBack = ParseTraceBack(T, m + 1, n + 1);
-
             var sb = new StringBuilder();
             string first, second;
 
@@ -189,8 +163,6 @@ namespace ABCReader {
             var sequence = new Sequence() { Score = M[m, n], Path = traceBack, One = first, Two = second };
             return sequence;
         }
-
-
         static string ParseTraceBack(string[,] T, int I, int J) {
             var sb = new StringBuilder();
             int i = I - 1;
@@ -211,7 +183,6 @@ namespace ABCReader {
             return ReverseString(sb.ToString());
         }
 
-
         static int Max(int a, int b, int c) {
             if (a >= b && a >= c)
                 return a;
@@ -226,9 +197,9 @@ namespace ABCReader {
                 var j = lookup[y];
                 return matrix[i, j];
             } else if (x == y)
-                return 1; // matrix file match * with *
+                return 1; 
 
-            return DefaultMismatchPenalty; // default mismatch penalty
+            return DefaultMismatchPenalty;
         }
 
         class LifeForm {
@@ -246,7 +217,6 @@ namespace ABCReader {
                 return s;
             }
         }
-
         public static List<string> ReadFileToList(string path) {
             var lines = new List<string>();
             StreamReader streamReader = null;
@@ -270,8 +240,8 @@ namespace ABCReader {
             return lines;
         }
 
-        public static void PL(object o) { Console.WriteLine(o); } //alias
-        public static void PL() { Console.WriteLine(); } //alias
-        public static void P(object o) { Console.Write(o); } //alias
+        public static void PL(object o) { Console.WriteLine(o); } 
+        public static void PL() { Console.WriteLine(); } 
+        public static void P(object o) { Console.Write(o); }
     }
 }

@@ -159,9 +159,6 @@ namespace ABCReader {
         /// <param name="seq">Sekwencja DNA</param>
         /// <returns>true jeśli znaki to tylko ACGT</returns>
         public static bool IsCleanDNA(string seq, bool allowN) {
-            //When you have ^, you tell the engine that whatever follows it must start at the beginning of the line
-            //When you have $, you tell the engine that whatever precedes it must start at the end of the line
-            //When you have both ^ and $ you tell the engine that whatever is in between them must cover the entire line end-to-end.
             if (allowN) {
                 Regex regex = new Regex(@"^[acgtnACGTN]+$");
                 bool result = regex.IsMatch(seq);
